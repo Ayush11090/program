@@ -1,0 +1,135 @@
+#include <stdio.h>
+
+void DeadlockDetection()
+{
+    int p, r;
+    printf("Enter the no. of processes: ");
+    scanf("%d", &p);
+    printf("\nEnter no. of resources: ");
+    scanf("%d", &r);
+    int max_r[r], alloc[p][r], request[p][r];
+
+    for (int i = 0; i < r; i++)
+    {
+        printf("\nEnter total amount of resource %d : ", i + 1);
+        scanf("%d", &max_r[i]);
+    }
+
+    // enter allocation matrix
+    printf("\nEnter allocation matrix:");
+    for (int i = 0; i < p; i++)
+    {
+        for (int j = 0; j < r; j++)
+        {
+            printf("\nProcess %d (Allocated Resourse %d):", i + 1, j + 1);
+            scanf("%d", &alloc[i][j]);
+        }
+    }
+    // enter request matrix
+    printf("\nEnter request matrix:");
+    for (int i = 0; i < p; i++)
+    {
+        for (int j = 0; j < r; j++)
+        {
+            printf("\nProcess %d (Request Resourse %d):", i + 1, j + 1);
+            scanf("%d", &request[i][j]);
+        }
+    }
+
+    // to calculate total allocated resources
+
+    int sum_allocated[r];
+    for (int w = 0; w < r; w++)
+    {
+        sum_allocated[w] = 0;
+    }
+
+    for (int i = 0; i < r; i++)
+    {
+        for (int j = 0; j < p; j++)
+        {
+            sum_allocated[i] += alloc[j][i];
+        }
+
+        printf("\nSum of allocated resource %d = %d", i + 1, sum_allocated[i]);
+    }
+
+    // to calculate available resources
+
+    int available[r];
+
+    for (int w = 0; w < r; w++)
+    {
+        available[w] = 0;
+    }
+
+    for (int i = 0; i < r; i++)
+    {
+        available[i] = max_r[i] - sum_allocated[i];
+    }
+
+    printf("\n\nAvailable resources in the beginning:");
+    for (int i = 0; i < r; i++)
+    {
+        printf("\nR%d = %d", i + 1, available[i]);
+    }
+
+    int work[r], finish[p], safe_sequence[p], count = 0;
+    for (int i = 0; i < r; i++)
+    {
+        work[i] = max_r[i];
+    }
+
+    for (int i = 0; i < p; i++)
+    {
+        finish[i] = 0;
+    }
+
+    while (count < p)
+    {
+        int found = 0;
+        for (int i = 0; i < p; i++)
+        {
+            if (finish[i] == 0)
+            {
+                int safe = 1;
+                for (int j = 0; j < r; j++)
+                {
+                    if (request[i][j] > work[j])
+                    {
+                        safe = 0;
+                        break;
+                    }
+                }
+                if (safe)
+                {
+                    for (int j = 0; j < r; j++)
+                    {
+                        work[j] += alloc[i][j];
+                    }
+                    finish[i] = 1;
+                    safe_sequence[count] = i;
+                    count++;
+                    found = 1;
+                }
+            }
+        }
+        if (found == 0)
+        {
+            printf("\nDeadlock detected\n");
+            break;
+        }
+    }
+
+    printf("\n\nSafe sequence: ");
+    for (int i = 0; i < p; i++)
+    {
+        printf("%d ", safe_sequence[i]);
+    }
+    printf("\n");
+}
+
+void main()
+{
+    DeadlockDetection();
+}
